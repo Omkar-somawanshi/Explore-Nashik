@@ -1,10 +1,11 @@
-import React, { useState } from "react"; // useState for potential future mobile menu
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FaMapMarkerAlt } from "react-icons/fa"; // Example icon for branding
 
 const Navbar = () => {
   const location = useLocation();
 
+  // Custom class logic for active link styling
   const navLinkClass = (path) =>
     `relative text-lg font-medium transition-all duration-300 ease-in-out
      ${
@@ -28,19 +29,26 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-8 group"> {/* Added group for menu item hover */}
+        <div className="hidden md:flex items-center space-x-8 group">
           <Link to="/" className={navLinkClass("/")}>
             Home
           </Link>
           <Link to="/explore" className={navLinkClass("/explore")}>
             Explore
           </Link>
-          {/* Add more links here */}
+          
+          <Link to="/wine-experience" className={navLinkClass("/wine-experience")}>
+            Wine Experience
+          </Link>
+          {/* NEW LINK: For the Culinary Journey page */}
+          <Link to="/culinary-journey" className={navLinkClass("/culinary-journey")}>
+            Culinary Journey
+          </Link>
+          {/* Add more links here if you have any other user-facing pages */}
         </div>
 
-        {/* Mobile Menu Button (Hamburger) */}
+        {/* Mobile Menu Button (Hamburger) - placeholder, ensure it works with your mobile menu logic */}
         <div className="md:hidden">
-          {/* Implement your mobile menu toggle here */}
           <button className="text-white text-2xl">☰</button>
         </div>
       </div>

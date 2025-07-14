@@ -7,6 +7,8 @@ import Explore from "./Pages/Explore";
 import SpotDetails from "./Pages/SpotDetails";
 import NotFound from "./Pages/NotFound";
 import Navbar from "./Components/Navbar"; // This is your user Navbar
+import GrapevineGlimpses from "./Pages/GrapevineGlimpses.jsx";
+import NashikCulinaryJourney from "./Pages/NashikCulinaryJourney.jsx"; // <--- NEW: Import the new page
 
 // Admin Layout + Pages
 import AdminLogin from "./Pages/Admin/AdminLogin";
@@ -15,24 +17,25 @@ import AddSpot from "./Pages/Admin/AddSpot";
 import EditSpot from "./Pages/Admin/EditSpot";
 import AdminLayout from "./Components/Admin/AdminLayout"; // This will contain your admin-specific Navbar/Sidebar
 
-/*************  ✨ Windsurf Command ⭐  *************/
+/*************  ✨ Windsurf Command ⭐  *************/
 /**
  * The App component is the root component that sets up the routing for the application.
  * It utilizes react-router-dom to define routes for both user-facing and admin sections.
- * 
+ *
  * User Routes:
  * - "/" renders the Home page with the main Navbar.
  * - "/explore" renders the Explore page with the main Navbar.
  * - "/spot/:id" renders the SpotDetails page with the main Navbar.
+ * - "/beyond-horizon" renders the BeyondHorizon page with the main Navbar.
+ * - "/wine-experience" renders the GrapevineGlimpses page with the main Navbar.
+ * - "/culinary-journey" renders the NashikCulinaryJourney page with the main Navbar. <--- ADDED THIS COMMENT
  * - "*" renders the NotFound page with the main Navbar for undefined user routes.
- * 
+ *
  * Admin Routes:
  * - "/admin/login" renders the AdminLogin page without the main Navbar.
  * - "/admin/dashboard" renders the AdminDashboard page within the AdminLayout.
-/*******  9e990396-5c9d-4a25-9626-937a2fdfaa86  *******/function App() {
-  // REMOVE THIS LINE: This caused the error because useLocation must be inside Router context.
-  // const isAdminRoute = useLocation().pathname.startsWith("/admin");
-
+ *******/
+function App() {
   return (
     <Router>
       <Routes>
@@ -61,6 +64,26 @@ import AdminLayout from "./Components/Admin/AdminLayout"; // This will contain y
             <>
               <Navbar />
               <SpotDetails />
+            </>
+          }
+        />
+       
+        <Route
+          path="/wine-experience"
+          element={
+            <>
+              <Navbar />
+              <GrapevineGlimpses />
+            </>
+          }
+        />
+        {/* NEW ROUTE FOR CULINARY JOURNEY PAGE */}
+        <Route
+          path="/culinary-journey" // <--- Choose a meaningful path for the URL
+          element={
+            <>
+              <Navbar />
+              <NashikCulinaryJourney />
             </>
           }
         />
