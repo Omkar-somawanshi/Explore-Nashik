@@ -420,7 +420,7 @@ const NashikCulinaryJourney = () => {
         </motion.section>
 
         {/* Culinary Tips Section */}
-        <motion.section
+        <motion.section/
           className="bg-gray-800/60 p-8 rounded-xl shadow-xl border border-gray-700 mb-12"
           variants={sectionVariants}
           initial="hidden"

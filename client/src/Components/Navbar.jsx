@@ -40,9 +40,13 @@ const Navbar = () => {
           <Link to="/wine-experience" className={navLinkClass("/wine-experience")}>
             Wine Experience
           </Link>
-          {/* NEW LINK: For the Culinary Journey page */}
+          {/* LINK: For the Culinary Journey page */}
           <Link to="/culinary-journey" className={navLinkClass("/culinary-journey")}>
             Culinary Journey
+          </Link>
+          {/* NEW LINK: For the Events Calendar page */}
+          <Link to="/events-calendar" className={navLinkClass("/events-calendar")}>
+            Events Calendar
           </Link>
           {/* Add more links here if you have any other user-facing pages */}
         </div>

@@ -1,54 +1,68 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { FaPlayCircle, FaWineGlassAlt, FaMountain, FaHistory, FaOm, FaUtensils, FaStar, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
-import nashikHomeBg from '../assets/photos/new.jpg';
+import {
+  FaPlayCircle,
+  FaWineGlassAlt,
+  FaMountain,
+  FaHistory,
+  FaOm,
+  FaUtensils,
+  FaStar,
+  FaVolumeUp,
+  FaVolumeMute,
+  FaMapMarkedAlt, // Added for "Explore" section
+} from "react-icons/fa";
+import nashikHomeBg from '../assets/photos/new.jpg'; // Ensure this path is correct
 import { motion } from "framer-motion";
 import { Howl } from 'howler';
 
-import ambientSound from '../assets/audio/history-historical.mp3';
+import ambientSound from '../assets/audio/history-historical.mp3'; // Ensure this path is correct
+
+// Import images for the new sections (you'll need to add these to your assets/photos folder)
+import wineExperienceImg from '../assets/photos/wine.jpg'; // Placeholder, replace with actual image
+import culinaryJourneyImg from '../assets/photos/nsk.jpg'; // Placeholder, replace with actual image
+import exploreNashikImg from '../assets/photos/nsk.jpg'; // Placeholder, replace with actual image
 
 const Home = () => {
-  // CORRECTED: Start `isMuted` as TRUE.
-  // This tells Howler.js to start the audio stream immediately, but silently.
   const [isMuted, setIsMuted] = useState(true);
   const soundRef = useRef(null);
+  const userInteracted = useRef(false); // To track if a user has interacted
 
   // Initialize and control the ambient sound
   useEffect(() => {
-    if (!soundRef.current) { // Ensure Howl instance is created only once
+    if (!soundRef.current) {
       soundRef.current = new Howl({
         src: [ambientSound],
         loop: true,
         volume: 0.3,
-        autoplay: true, // This will attempt to autoplay
+        autoplay: true,
         preload: true,
-        mute: true, // CORRECTED: MOST IMPORTANT - Tells Howl to start muted
+        mute: true, // Start muted
         onplayerror: (id, error) => {
-          // This typically means the browser blocked autoplay with sound.
-          // The sound will still be *playing silently* and will become audible on first user interaction.
           console.error("Howler.js playback error:", error);
+          // If autoplay failed, and no user interaction yet, keep muted state as is.
+          // The browser will typically unmute on the first user interaction (like clicking the mute button).
         }
       });
     }
 
-    // This function ensures React's `isMuted` state always matches Howl's internal mute state.
-    // This is crucial if browser unmuting happens or when `toggleMute` is called.
+    // Function to update React's `isMuted` state based on Howl's internal state
     const updateMuteState = () => {
-        if (soundRef.current) {
-            setIsMuted(soundRef.current.mute());
-        }
+      if (soundRef.current) {
+        setIsMuted(soundRef.current.mute());
+      }
     };
 
     // Add event listeners to keep `isMuted` state in sync with Howl's actual playback status
     if (soundRef.current) {
-        soundRef.current.on('play', updateMuteState);
-        soundRef.current.on('mute', updateMuteState); // Listen for explicit mute/unmute calls
+      soundRef.current.on('play', updateMuteState);
+      soundRef.current.on('mute', updateMuteState); // Listen for explicit mute/unmute calls
     }
 
     // Clean up sound on component unmount
     return () => {
       if (soundRef.current) {
-        soundRef.current.off('play', updateMuteState); // Clean up listeners
+        soundRef.current.off('play', updateMuteState);
         soundRef.current.off('mute', updateMuteState);
         soundRef.current.stop();
         soundRef.current.unload();
@@ -59,7 +73,12 @@ const Home = () => {
 
   // Toggle mute state and control Howl instance
   const toggleMute = () => {
+    userInteracted.current = true; // User has interacted, now we can play sound reliably
     if (soundRef.current) {
+      // If sound is loaded but not playing (e.g., autoplay blocked initially), play it first
+      if (!soundRef.current.playing()) {
+        soundRef.current.play();
+      }
       const currentlyMuted = soundRef.current.mute(); // Get Howl's current mute state
       soundRef.current.mute(!currentlyMuted); // Toggle Howl's mute state
       setIsMuted(!currentlyMuted); // Update React state to reflect Howl's state
@@ -95,6 +114,18 @@ const Home = () => {
     },
   };
 
+  const sectionHeaderVariants = {
+    hidden: { opacity: 0, x: -50 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: "easeOut" } },
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" } },
+    hover: { scale: 1.05, boxShadow: "0 10px 20px rgba(0,0,0,0.4)" },
+    tap: { scale: 0.98 },
+  };
+
   // Data for the key highlights/benefits section
   const benefits = [
     { icon: FaOm, text: "Spiritual Hub" },
@@ -103,17 +134,34 @@ const Home = () => {
     { icon: FaHistory, text: "Rich Heritage" },
   ];
 
-  // Data for Quick Links to Popular Categories (this section was commented out in your provided code)
-  const popularCategories = [
-    { name: "Temples", icon: FaOm, route: "/explore?category=Religious" },
-    { name: "Vineyards", icon: FaWineGlassAlt, route: "/explore?category=Nature" },
-    { name: "Foodie Trails", icon: FaUtensils, route: "/explore?category=Food & Drink" },
-    { name: "Top Rated", icon: FaStar, route: "/explore?sort=rating" },
+  // Data for the "What You'll Discover" section linking to main pages
+  const discoverSections = [
+    {
+      title: "Wine Experiences",
+      description: "Explore Nashik's renowned vineyards and indulge in world-class wine tasting tours.",
+      icon: FaWineGlassAlt,
+      route: "/wine-experience",
+      image: wineExperienceImg, // Placeholder
+    },
+    {
+      title: "Culinary Journey",
+      description: "Savor the authentic flavors of Nashik, from spicy street food to traditional Maharashtrian thalis.",
+      icon: FaUtensils,
+      route: "/culinary-journey",
+      image: culinaryJourneyImg, // Placeholder
+    },
+    {
+      title: "Explore Nashik",
+      description: "Uncover historical sites, serene temples, and breathtaking natural landscapes.",
+      icon: FaMapMarkedAlt,
+      route: "/explore",
+      image: exploreNashikImg, // Placeholder
+    },
   ];
 
   return (
     <section
-      className="relative h-screen w-full bg-cover bg-fixed bg-center flex items-center justify-center text-white overflow-hidden cursor-default" // CORRECTED: Changed cursor-none to cursor-default
+      className="relative min-h-screen w-full bg-cover bg-fixed bg-center flex flex-col items-center justify-center text-white overflow-hidden"
       style={{
         backgroundImage: `url(${nashikHomeBg})`,
       }}
@@ -128,23 +176,24 @@ const Home = () => {
 
       {/* Mute/Unmute Button */}
       <motion.button
-        onClick={toggleMute} // Added onClick handler back
+        onClick={toggleMute}
         className="absolute bottom-6 left-6 z-30 p-3 bg-white/10 rounded-full
                    text-white/80 hover:text-lime-300 backdrop-blur-sm
                    transition-colors duration-300 shadow-lg"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0, transition: { duration: 0.5 } }} // Removed delay here for quick appearance
+        animate={{ opacity: 1, x: 0, transition: { duration: 0.5, delay: 0.2 } }}
+        aria-label={isMuted ? "Unmute ambient sound" : "Mute ambient sound"}
       >
         {isMuted ? <FaVolumeMute className="text-2xl" /> : <FaVolumeUp className="text-2xl" />}
       </motion.button>
 
-      {/* Content Area - Framed and Centralized with Framer Motion animations */}
+      {/* Main Content Area */}
       <motion.div
-        className="relative z-10 p-6 sm:p-10 lg:p-16 max-w-4xl w-full
+        className="relative z-10 p-6 sm:p-10 lg:p-16 max-w-4xl w-full 
                    bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 shadow-2xl
-                   flex flex-col items-center text-center"
+                   flex flex-col items-center text-center mt-20 mb-10 md:mt-30 md:mb-0" // Adjust margins for better spacing
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -170,7 +219,7 @@ const Home = () => {
           of Maharashtra's cultural heart.
         </motion.p>
 
-        {/* Cinematic Button with Framer Motion for hover and tap effects */}
+        {/* Cinematic Button */}
         <motion.div variants={itemVariants}>
           <Link
             to="/explore"
@@ -193,47 +242,9 @@ const Home = () => {
           </Link>
         </motion.div>
 
-        {/* Quick Links to Popular Categories - Uncomment this section if you want to use it */}
-        {/*
-        <motion.div
-          className="mt-10 mb-8 w-full max-w-xl grid grid-cols-2 lg:grid-cols-4 gap-4"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: {
-                delayChildren: 1.5,
-                staggerChildren: 0.1
-              }
-            }
-          }}
-        >
-          {popularCategories.map((cat, index) => (
-            <motion.div
-              key={index}
-              variants={itemVariants}
-              whileHover={{ scale: 1.05, boxShadow: "0 8px 16px rgba(0,0,0,0.3)" }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="group"
-            >
-              <Link
-                to={cat.route}
-                className="flex flex-col items-center p-3 sm:p-4 bg-white/10 rounded-lg shadow-inner
-                           border border-white/5 text-white/90 hover:text-lime-300 transition-colors duration-300"
-              >
-                <cat.icon className="text-3xl sm:text-4xl text-lime-300 mb-2 transition-transform duration-300 group-hover:scale-110 drop-shadow-lg" />
-                <p className="text-xs sm:text-sm font-semibold">{cat.name}</p>
-              </Link>
-            </motion.div>
-          ))}
-        </motion.div>
-        */}
-
         {/* Key Highlights/Benefits Section */}
         <motion.div
-          className="mt-6 w-full grid grid-cols-2 md:grid-cols-4 gap-6 text-white/90"
+          className="mt-12 w-full grid grid-cols-2 md:grid-cols-4 gap-6 text-white/90"
           initial="hidden"
           animate="visible"
           variants={{
@@ -260,6 +271,60 @@ const Home = () => {
             </motion.div>
           ))}
         </motion.div>
+      </motion.div>
+
+      {/* NEW: "What You'll Discover" Section - outside the main framed div but still centered */}
+      <motion.div
+        className="relative z-10 w-full max-w-6xl mx-auto p-6 sm:p-10 lg:p-16 mt-12 mb-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={{ visible: { opacity: 1, transition: { staggerChildren: 0.2 } }, hidden: { opacity: 0 } }}
+      >
+        <motion.h2
+          className="text-4xl font-extrabold text-white text-center mb-10 drop-shadow-lg"
+          variants={sectionHeaderVariants}
+        >
+          What You'll Discover
+        </motion.h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {discoverSections.map((section, index) => (
+            <Link to={section.route} key={index}>
+              <motion.div
+                className="relative bg-gray-800/60 rounded-xl overflow-hidden shadow-xl border border-gray-700
+                           group cursor-pointer flex flex-col h-full"
+                variants={cardVariants}
+                whileHover="hover"
+                whileTap="tap"
+              >
+                <div className="relative w-full h-48 overflow-hidden">
+                  <img
+                    src={section.image}
+                    alt={section.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
+                  />
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <section.icon className="text-6xl text-lime-400 opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                </div>
+                <div className="p-6 flex-grow flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-lime-300 transition-colors">
+                      {section.title}
+                    </h3>
+                    <p className="text-gray-300 text-sm mb-4">
+                      {section.description}
+                    </p>
+                  </div>
+                  <button className="mt-4 w-full px-4 py-2 bg-lime-600 hover:bg-lime-700 text-white font-semibold rounded-lg transition-colors">
+                    Learn More
+                  </button>
+                </div>
+              </motion.div>
+            </Link>
+          ))}
+        </div>
       </motion.div>
     </section>
   );
