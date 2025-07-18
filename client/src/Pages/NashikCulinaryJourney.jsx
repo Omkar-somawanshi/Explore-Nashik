@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,9 +10,10 @@ import {
   FaStore,
   FaCookieBite,
   FaDrumstickBite,
+  FaClipboardList, // New icon for plan details
 } from "react-icons/fa";
 
-// Sample Data for Culinary Sections
+// Sample Data for Culinary Sections (kept for context, but plan details will come from API)
 const foodExperiences = [
   {
     id: "1",
@@ -136,6 +137,36 @@ const recommendedRestaurants = [
 
 const NashikCulinaryJourney = () => {
   const navigate = useNavigate();
+
+  // State for Plan Details
+  const [planDetails, setPlanDetails] = useState(null);
+  const [loadingPlan, setLoadingPlan] = useState(true);
+  const [errorPlan, setErrorPlan] = useState(null);
+
+  // Fetch Plan Details on component mount
+  useEffect(() => {
+    const fetchPlanDetails = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/home/plandetail');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.success) {
+          setPlanDetails(data.planDetail);
+        } else {
+          setErrorPlan(data.message || 'Failed to fetch plan details.');
+        }
+      } catch (error) {
+        console.error("Error fetching plan details:", error);
+        setErrorPlan('Could not load plan details. Please try again later.');
+      } finally {
+        setLoadingPlan(false);
+      }
+    };
+
+    fetchPlanDetails();
+  }, []); // Empty dependency array means this runs once on mount
 
   // Framer Motion variants for animations
   const containerVariants = {
@@ -276,6 +307,37 @@ const NashikCulinaryJourney = () => {
           Nashik. From fiery street food to traditional Maharashtrian thalis,
           your taste buds are in for a treat!
         </motion.p>
+
+        {/* Plan Details Section (Dynamically Loaded) */}
+        <motion.section
+          className="bg-gray-800/60 p-8 rounded-xl shadow-xl border border-gray-700 mb-12"
+          variants={sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <h2 className="text-3xl font-bold text-orange-400 mb-4 flex items-center">
+            <FaClipboardList className="mr-3 text-2xl" /> Our Special Plan Details
+          </h2>
+          {loadingPlan ? (
+            <p className="text-gray-300">Loading plan details...</p>
+          ) : errorPlan ? (
+            <p className="text-red-400">Error: {errorPlan}</p>
+          ) : planDetails ? (
+            <div className="text-gray-300">
+              <h3 className="text-2xl font-semibold text-white mb-2">{planDetails.heading}</h3>
+              <div className="mb-4" dangerouslySetInnerHTML={{ __html: planDetails.description }}></div>
+              <h4 className="text-xl font-semibold text-orange-300 mb-2">Plan Benefits:</h4>
+              <div className="mb-4" dangerouslySetInnerHTML={{ __html: planDetails.plan_benefits }}></div>
+              <p className="mb-2"><span className="font-semibold text-white">For Whom:</span> {planDetails.from_whom}</p>
+              <h4 className="text-xl font-semibold text-orange-300 mb-2">Why Subscribe:</h4>
+              <div dangerouslySetInnerHTML={{ __html: planDetails.why_subscribe }}></div>
+              <p className="text-sm text-gray-400 mt-4">Last Updated: {planDetails.updated_at ? new Date(planDetails.updated_at).toLocaleString() : 'N/A'}</p>
+            </div>
+          ) : (
+            <p className="text-gray-300">No plan details available. Please add them via the admin panel.</p>
+          )}
+        </motion.section>
 
         {/* Introduction to Nashik's Food Scene */}
         <motion.section
@@ -420,7 +482,7 @@ const NashikCulinaryJourney = () => {
         </motion.section>
 
         {/* Culinary Tips Section */}
-        <motion.section/
+        <motion.section
           className="bg-gray-800/60 p-8 rounded-xl shadow-xl border border-gray-700 mb-12"
           variants={sectionVariants}
           initial="hidden"
